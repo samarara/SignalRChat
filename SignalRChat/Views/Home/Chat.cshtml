@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewBag.Title = "Chat";
+}
+
+<h2>Chat</h2>
+
+@*<p>hello world</p>*@
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery.signalR-2.2.1.js"></script>
+<script src="~/signalr/hubs"></script>
+
+<div id="messages">
+    <input type="text" id="textMessage"/>
+    <input type="button" id="sendButton" value="Send"/>
+    <input type="hidden" id="username"/>
+    <ul id="messages">
+    </ul>
+</div>
+
+<script>
+    $(function() {
+        var conn = $.hubConnection();
+        var chatHubProxy = conn.createHubProxy('chatHub');
+        chatHubProxy.on('addNewChatMessageToPage',
+            function (name, message) {
+                $('#messages').append('<li><strong>' + name + '</strong>: ' + message);
+            });
+        $('#username').val(prompt('Enter your name: '));
+        $('#textMessage').focus();
+
+        conn.start()
+            .done(function() {
+                $('#sendButton')
+                    .click(function() {
+                        chatHubProxy.invoke('sendMessage', $('#username').val(), $('#textMessage').val());
+                        $('#textMessage').val('').focus();
+                    });
+            });
+    });
+    
+
+</script>
